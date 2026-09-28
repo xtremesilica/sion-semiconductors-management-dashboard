@@ -6,6 +6,7 @@
 <title>SION Semiconductors — Management Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root{
   --paper:#FAFBFD; --ink:#0E1726; --ink2:#44506A; --ink3:#8A94A8;
@@ -34,6 +35,34 @@ header{border-bottom:2px solid var(--ink);padding:26px 0 20px;display:flex;align
 .meta{text-align:right;font-size:12px;color:var(--ink2)}
 .meta .live{display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--green)}
 .meta .live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green)}
+.management-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
+.management-action{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:8px 13px;border:1px solid var(--line2);background:#fff;color:var(--ink);text-decoration:none;cursor:pointer}
+.management-action:hover,.management-action.on{border-color:var(--copper);color:var(--copper);background:var(--copper-soft)}
+.management-action.primary{border-color:var(--copper);background:var(--copper);color:#fff}
+.management-action.primary:hover{background:#9A3412;color:#fff}
+
+/* ---------- project controls ---------- */
+.project-page{display:none;margin-top:24px}.project-page.on{display:block}
+.progress-shell{background:#fff;border:1px solid var(--line2)}
+.progress-head{padding:23px 26px;background:linear-gradient(135deg,#7C2D12,var(--copper));color:#fff}
+.progress-head .eyebrow,.assignment-head .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.15em;color:#FED7AA}
+.progress-head h1,.assignment-head h1{font-family:'Space Grotesk',sans-serif;font-size:25px;line-height:1.15;margin:3px 0}.progress-head p{color:#FFEDD5}
+.progress-body{padding:22px 26px 28px}.progress-toolbar{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.progress-filter{display:grid;gap:5px;min-width:190px}.progress-filter span{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.progress-filter select{height:39px;border:1px solid var(--line2);background:#fff;padding:0 32px 0 10px;color:var(--ink)}
+.progress-refresh{height:39px;border:1px solid var(--copper);background:var(--copper);color:#fff;padding:0 15px;font-weight:600;cursor:pointer}
+.progress-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}.progress-stat{border:1px solid #F3C6B3;background:#FFF7F2;padding:13px 15px}
+.progress-stat span{display:block;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}.progress-stat strong{font-family:'IBM Plex Mono',monospace;font-size:22px;color:#9A3412}
+.progress-layout{display:grid;grid-template-columns:minmax(280px,.75fr) minmax(0,1.55fr);gap:16px}.progress-panel{border:1px solid var(--line);padding:16px;min-width:0}.progress-panel h2{font-size:15px;margin-bottom:11px}
+.progress-chart-wrap{height:320px}.progress-table-wrap{overflow:auto;max-height:390px}.progress-table th{text-align:left;background:#FFF1EA;color:#9A3412;position:sticky;top:0;z-index:1}.progress-table td{text-align:left;vertical-align:top;font-size:11.5px;padding:10px 8px}.progress-table td:first-child{font-size:12px}.progress-table .muted{display:block;color:var(--ink3);font-size:10px;margin-top:2px}.progress-table .rate{font-weight:700;color:#9A3412}.mini-track{width:100px;height:6px;background:#FBE0D4;margin-top:5px}.mini-fill{height:100%;background:var(--copper)}
+.task-status{display:inline-block;padding:3px 7px;border-radius:99px;background:var(--grid);font-size:9px;text-transform:uppercase;font-weight:600}.task-status.blocked{background:#FEE2E2;color:#B91C1C}.task-status.completed{background:var(--green-soft);color:var(--green)}.task-status.in-progress{background:var(--amber-soft);color:var(--amber)}
+.progress-error{padding:10px 12px;margin-bottom:14px;border:1px solid #FCA5A5;background:#FEF2F2;color:#991B1B}.progress-empty{text-align:center;padding:32px;color:var(--ink3)}
+
+#assignmentDialog{width:min(760px,calc(100% - 28px));max-height:92vh;padding:0;border:0;box-shadow:0 22px 70px rgba(14,23,38,.28);overflow:auto;color:var(--ink)}#assignmentDialog::backdrop{background:rgba(14,23,38,.62);backdrop-filter:blur(3px)}
+#assignmentDialog button,#assignmentDialog input,#assignmentDialog select,#assignmentDialog textarea{font:inherit}.assignment-head{display:flex;justify-content:space-between;gap:20px;padding:25px 28px 20px;background:linear-gradient(135deg,#7C2D12,var(--copper));color:#fff}.assignment-head .subtitle{color:#FFEDD5}.assignment-close{width:36px;height:36px;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:24px;cursor:pointer}
+.assignment-steps{display:grid;grid-template-columns:repeat(3,1fr);padding:18px 28px;list-style:none;border-bottom:1px solid var(--line);font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink3)}.assignment-steps li{display:flex;align-items:center;gap:8px}.assignment-steps li:not(:last-child)::after{content:"";height:2px;background:var(--line);flex:1;margin:0 10px}.assignment-steps span{display:grid;place-items:center;width:25px;height:25px;border-radius:50%;background:var(--grid)}.assignment-steps .active{color:var(--copper)}.assignment-steps .active span{background:var(--copper);color:#fff}
+.assignment-panel{padding:26px 28px 28px}.assignment-panel>label,.assignment-grid label{display:grid;gap:6px;font-weight:600;font-size:12.5px}.assignment-panel textarea,.assignment-panel input,.assignment-panel select{width:100%;padding:11px;border:1px solid var(--line2);background:#fff;color:var(--ink);outline:none}.assignment-panel textarea:focus,.assignment-panel input:focus,.assignment-panel select:focus{border-color:var(--copper);box-shadow:0 0 0 3px rgba(194,65,12,.12)}.assignment-hint{display:flex;justify-content:space-between;margin-top:7px;color:var(--ink3)}.assignment-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:22px}.assignment-button{border:0;padding:10px 15px;font-weight:600;cursor:pointer}.assignment-button.primary{background:var(--copper);color:#fff}.assignment-button.secondary{background:var(--grid);color:var(--ink)}.assignment-button:disabled{opacity:.55;cursor:not-allowed}.assignment-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.assignment-grid .wide{grid-column:1/-1}.review-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}.ai-badge{padding:4px 9px;border-radius:99px;background:var(--copper-soft);color:var(--copper);font-family:'IBM Plex Mono',monospace;font-size:9.5px}.confirm-check{display:flex!important;grid-template-columns:18px 1fr!important;align-items:start;margin-top:18px;color:var(--ink2)}.confirm-check input{width:16px;height:16px;margin-top:2px;accent-color:var(--copper)}.assignment-notice{margin:18px 28px 0;padding:10px 12px;background:var(--amber-soft);color:var(--amber)}.assignment-notice.error{background:#FEE2E2;color:#991B1B}.assignment-success{text-align:center;padding-block:38px}.success-icon{display:grid;place-items:center;width:58px;height:58px;margin:0 auto 14px;border-radius:50%;background:var(--green-soft);color:var(--green);font-size:28px}.created-record{display:flex;justify-content:center;gap:28px;margin:20px auto;padding:14px;background:var(--grid)}.created-record span{display:grid;color:var(--ink3);font-size:11px}.created-record strong{font-size:16px;color:var(--ink)}
+@media(max-width:800px){.management-actions{justify-content:flex-start}.progress-summary{grid-template-columns:repeat(2,1fr)}.progress-layout{grid-template-columns:1fr}.progress-body{padding:17px}.assignment-grid{grid-template-columns:1fr}.assignment-grid .wide{grid-column:auto}.assignment-head,.assignment-panel{padding-left:19px;padding-right:19px}.assignment-steps{padding-left:19px;padding-right:19px}.assignment-steps li{font-size:0}.assignment-steps span{font-size:11px}}
 
 /* ---------- KPI strip ---------- */
 .kpis{display:grid;grid-template-columns:repeat(8,1fr);border:1px solid var(--line2);border-top:none;background:#fff}
@@ -352,6 +381,10 @@ nav .sep{width:1px;background:var(--line2);margin:8px 6px;flex:none}
     <span class="live">DATA AS OF 01-SEP-2026</span><br>
     82 employees · 35 billable · 35 trainee bench · 12 admin team<br>
     15 customers · figures monthly, ₹ · aggregates only — no individual salaries
+    <div class="management-actions">
+      <a id="taskProgressLink" class="management-action" href="#task-progress">Task Progress</a>
+      <button id="openAssignment" class="management-action primary" type="button">Assign Project</button>
+    </div>
   </div>
 </header>
 
@@ -1399,6 +1432,73 @@ nav .sep{width:1px;background:var(--line2);margin:8px 6px;flex:none}
 </footer>
 </div>
 
+<main id="task-progress" class="project-page" aria-labelledby="taskProgressTitle">
+  <div class="progress-shell">
+    <div class="progress-head">
+      <div class="eyebrow">PROJECT CONTROL</div>
+      <h1 id="taskProgressTitle">Assigned Task Progress</h1>
+      <p>Live completion rates, ownership, task status and reported blockers.</p>
+    </div>
+    <div class="progress-body">
+      <div id="taskProgressError" class="progress-error" role="alert" hidden></div>
+      <div class="progress-toolbar">
+        <label class="progress-filter"><span>Employee</span><select id="taskProgressEmployee"><option value="">All employees</option></select></label>
+        <label class="progress-filter"><span>Status</span><select id="taskProgressStatus"><option value="">All statuses</option><option>Assigned</option><option>In Progress</option><option>Blocked</option><option>Completed</option></select></label>
+        <button id="refreshTaskProgress" class="progress-refresh" type="button">Refresh progress</button>
+      </div>
+      <div class="progress-summary">
+        <div class="progress-stat"><span>Assigned tasks</span><strong id="progressTaskCount">0</strong></div>
+        <div class="progress-stat"><span>Average progress</span><strong id="progressAverage">0%</strong></div>
+        <div class="progress-stat"><span>Completed</span><strong id="progressCompleted">0</strong></div>
+        <div class="progress-stat"><span>Blocked</span><strong id="progressBlocked">0</strong></div>
+      </div>
+      <div class="progress-layout">
+        <section class="progress-panel"><h2>Task progression rate</h2><div class="progress-chart-wrap"><canvas id="taskProgressChart"></canvas></div></section>
+        <section class="progress-panel"><h2>Assigned tasks and blockers</h2><div class="progress-table-wrap">
+          <table class="progress-table"><thead><tr><th>Task</th><th>Employee / Manager</th><th>Progress</th><th>Status</th><th>Blocker name</th></tr></thead><tbody id="taskProgressRows"></tbody></table>
+          <div id="taskProgressEmpty" class="progress-empty" hidden>No assigned tasks were returned.</div>
+        </div></section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<dialog id="assignmentDialog" aria-labelledby="assignmentTitle">
+  <div>
+    <div class="assignment-head">
+      <div><div class="eyebrow">PROJECT CONTROL</div><h1 id="assignmentTitle">Create an assignment</h1><p class="subtitle">Describe it naturally. Review the extracted details before saving.</p></div>
+      <button id="closeAssignment" class="assignment-close" type="button" aria-label="Close">×</button>
+    </div>
+    <ol class="assignment-steps" aria-label="Assignment progress"><li class="active" data-assignment-step-indicator="1"><span>1</span>Instruction</li><li data-assignment-step-indicator="2"><span>2</span>Review</li><li data-assignment-step-indicator="3"><span>3</span>Created</li></ol>
+    <div id="assignmentNotice" class="assignment-notice" role="status" aria-live="polite" hidden></div>
+    <section class="assignment-panel" data-assignment-step="1">
+      <label for="assignmentInstruction">Informal assignment</label>
+      <textarea id="assignmentInstruction" rows="7" maxlength="2000" placeholder="Example: Assign dashboard API integration to Karthikeya. Complete it by 20 September. Girish is the manager. Make this high priority."></textarea>
+      <div class="assignment-hint"><small>Include the employee, manager, deadline and expected result.</small><small><span id="assignmentCharCount">0</span>/2000</small></div>
+      <div class="assignment-actions"><button class="assignment-button secondary" data-assignment-close type="button">Cancel</button><button id="extractAssignment" class="assignment-button primary" type="button">Extract details with AI</button></div>
+    </section>
+    <form id="assignmentForm" class="assignment-panel" data-assignment-step="2" hidden>
+      <div class="review-head"><div><h2>Confirm assignment</h2><p>Verify every field before creating the task.</p></div><span class="ai-badge">AI extracted</span></div>
+      <div class="assignment-grid">
+        <label class="wide">Project name<input name="project_name" required></label>
+        <label>Employee<select name="employee_id" required><option value="">Select employee</option></select></label>
+        <label>Manager<select name="manager_id" required><option value="">Select manager</option></select></label>
+        <label class="wide">Task title<input name="task_title" required></label>
+        <label class="wide">Task description<textarea name="task_description" rows="4" required></textarea></label>
+        <label>Priority<select name="priority" required><option>Low</option><option selected>Medium</option><option>High</option><option>Critical</option></select></label>
+        <label>Due date<input name="due_date" type="date" required></label>
+      </div>
+      <label class="confirm-check"><input type="checkbox" required> I reviewed these details and confirm this assignment.</label>
+      <div class="assignment-actions"><button id="backAssignment" class="assignment-button secondary" type="button">Back</button><button id="confirmAssignment" class="assignment-button primary" type="submit">Confirm &amp; create task</button></div>
+    </form>
+    <section class="assignment-panel assignment-success" data-assignment-step="3" hidden>
+      <div class="success-icon">✓</div><h2>Assignment created</h2><p id="assignmentSuccess">The task was saved and dashboard data was refreshed.</p>
+      <div class="created-record"><span>Project ID<strong id="createdProjectId">—</strong></span><span>Task ID<strong id="createdTaskId">—</strong></span></div>
+      <div class="assignment-actions" style="justify-content:center"><button id="doneAssignment" class="assignment-button primary" type="button">Done</button></div>
+    </section>
+  </div>
+</dialog>
+
 <script>
 /* ---------- hash router: home <-> BU pages ---------- */
 (function(){
@@ -1406,11 +1506,14 @@ const pages=['bu-design','bu-networking','bu-aerospace','bu-ssd','bu-datacenter'
 function route(){
   const h=(location.hash||'#home').slice(1);
   const onBu=pages.includes(h);
-  document.getElementById('home-view').classList.toggle('hide',onBu);
+  const onProgress=h==='task-progress';
+  document.getElementById('home-view').classList.toggle('hide',onBu||onProgress);
+  document.getElementById('task-progress').classList.toggle('on',onProgress);
+  document.getElementById('taskProgressLink').classList.toggle('on',onProgress);
   pages.forEach(p=>document.getElementById(p).classList.toggle('on',p===h));
   document.querySelectorAll('#nav a').forEach(a=>{
     a.classList.toggle('on', a.getAttribute('href')==='#'+h);
-    if(a.classList.contains('home')) a.classList.toggle('on', h==='home'||!onBu);
+    if(a.classList.contains('home')) a.classList.toggle('on', h==='home'||(!onBu&&!onProgress));
   });
   window.scrollTo(0,0);
 }
@@ -1898,6 +2001,160 @@ document.querySelectorAll('svg.bucash').forEach(svg=>{
       document.querySelectorAll('#bu-datacenter .dtab-pane').forEach(p=>p.classList.toggle('on',p.id===id));
     });
   });
+})();
+</script>
+<script id="project-controls">
+(() => {
+  'use strict';
+  const apiBaseUrl='https://automation.sionsemi.com';
+  const requestTimeoutMs=60000;
+  const endpoints={extract:'/webhook/assignment/extract',confirm:'/webhook/assignment/confirm',projects:'/webhook/dashboard/projects'};
+
+  async function request(path,options={}){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),requestTimeoutMs);
+    try{
+      const response=await fetch(apiBaseUrl+path,{...options,credentials:'omit',headers:{Accept:'application/json',...(options.body?{'Content-Type':'application/json'}:{}),...options.headers},signal:controller.signal});
+      const text=await response.text();
+      let payload;
+      try{payload=text?JSON.parse(text):null}catch{throw new Error(`The server returned non-JSON data (${response.status}). Check the n8n response node.`)}
+      if(!response.ok)throw new Error(payload?.message||payload?.detail||payload?.error||`Request failed (${response.status}).`);
+      if(payload===null)throw new Error('n8n returned an empty response. Check the Respond to Webhook node.');
+      if(payload.success===false)throw new Error(payload.message||payload.error||'The workflow could not complete the request.');
+      return payload;
+    }catch(error){
+      if(error.name==='AbortError')throw new Error('The request timed out. Check n8n Executions and try again.');
+      if(error instanceof TypeError)throw new Error('The dashboard cannot reach n8n. Check the webhook URL, workflow activation and CORS settings.');
+      throw error;
+    }finally{clearTimeout(timer)}
+  }
+
+  const dialog=document.getElementById('assignmentDialog');
+  const form=document.getElementById('assignmentForm');
+  const instruction=document.getElementById('assignmentInstruction');
+  const notice=document.getElementById('assignmentNotice');
+  let extractedInstruction='',busy=false,saved=false;
+
+  function showStep(step){
+    document.querySelectorAll('[data-assignment-step]').forEach(el=>el.hidden=Number(el.dataset.assignmentStep)!==step);
+    document.querySelectorAll('[data-assignment-step-indicator]').forEach(el=>el.classList.toggle('active',Number(el.dataset.assignmentStepIndicator)<=step));
+    notice.hidden=true;
+  }
+  function showNotice(message,error=false){notice.textContent=message;notice.className=`assignment-notice${error?' error':''}`;notice.hidden=false}
+  function resetAssignment(){form.reset();instruction.value='';extractedInstruction='';saved=false;document.getElementById('assignmentCharCount').textContent='0';document.getElementById('createdProjectId').textContent='—';document.getElementById('createdTaskId').textContent='—';document.getElementById('confirmAssignment').disabled=false;showStep(1)}
+  function closeAssignment(){if(busy){showNotice('Please wait for the current request to finish.');return}dialog.close()}
+  function fillPeople(select,people,selectedId){
+    select.replaceChildren(new Option('Select',''));
+    const seen=new Set();
+    people.forEach(person=>{const id=person.employee_id??person.manager_id??person.id;if(id===undefined||id===null||seen.has(String(id)))return;seen.add(String(id));select.add(new Option(person.name||`ID ${id}`,String(id)))});
+    if(selectedId!==undefined&&selectedId!==null)select.value=String(selectedId);
+  }
+  function populatePreview(payload){
+    const details=payload.extracted||payload.assignment||payload;
+    const employees=Array.isArray(payload.employees)?payload.employees:[];
+    const managers=Array.isArray(payload.managers)?payload.managers:[];
+    if(!details||typeof details!=='object')throw new Error('The workflow returned an invalid assignment preview.');
+    form.reset();
+    ['project_name','task_title','task_description','due_date'].forEach(key=>{if(form.elements[key])form.elements[key].value=details[key]??''});
+    form.elements.priority.value=['Low','Medium','High','Critical'].includes(details.priority)?details.priority:'Medium';
+    fillPeople(form.elements.employee_id,employees,details.employee_id);
+    fillPeople(form.elements.manager_id,managers,details.manager_id);
+  }
+  async function refreshProjects(){
+    const result=await request(endpoints.projects,{method:'GET'});
+    const projects=Array.isArray(result)?result:(result.projects??result.tasks??result.data);
+    if(!Array.isArray(projects))throw new Error('The projects webhook must return an array.');
+    window.dispatchEvent(new CustomEvent('dashboard:projects-refreshed',{detail:{projects}}));
+    return projects;
+  }
+
+  document.getElementById('openAssignment').addEventListener('click',()=>{if(busy)return;showStep(saved?3:1);dialog.showModal();if(!saved)instruction.focus()});
+  document.getElementById('closeAssignment').addEventListener('click',closeAssignment);
+  document.querySelectorAll('[data-assignment-close]').forEach(button=>button.addEventListener('click',closeAssignment));
+  dialog.addEventListener('cancel',event=>{if(busy)event.preventDefault()});
+  document.getElementById('doneAssignment').addEventListener('click',()=>{dialog.close();resetAssignment()});
+  document.getElementById('backAssignment').addEventListener('click',()=>{if(!busy&&!saved)showStep(1)});
+  instruction.addEventListener('input',()=>document.getElementById('assignmentCharCount').textContent=String(instruction.value.length));
+
+  document.getElementById('extractAssignment').addEventListener('click',async()=>{
+    if(busy||saved)return;
+    const text=instruction.value.trim();
+    if(text.length<10){showNotice('Enter an assignment instruction of at least 10 characters.',true);return}
+    const button=document.getElementById('extractAssignment');busy=true;button.disabled=true;button.textContent='Extracting…';notice.hidden=true;
+    try{
+      const data=await request(endpoints.extract,{method:'POST',body:JSON.stringify({instruction:text})});
+      populatePreview(data);extractedInstruction=text;showStep(2);
+      const required=['project_name','employee_id','manager_id','task_title','task_description','due_date'];
+      if(required.some(key=>!String(form.elements[key]?.value||'').trim()))showNotice('Please complete the missing details and review the assignment before saving.');
+    }catch(error){showNotice(error.message,true)}finally{busy=false;button.disabled=false;button.textContent='Extract details with AI'}
+  });
+
+  form.addEventListener('submit',async event=>{
+    event.preventDefault();if(busy||saved||!form.reportValidity())return;
+    const payload=Object.fromEntries(new FormData(form).entries());
+    Object.keys(payload).forEach(key=>{if(typeof payload[key]==='string')payload[key]=payload[key].trim()});
+    const required=['project_name','employee_id','manager_id','task_title','task_description','due_date'];
+    if(required.some(key=>!payload[key])){showNotice('Please complete every required field.',true);return}
+    payload.confirmed_by=sessionStorage.getItem('sion_user_id')||sessionStorage.getItem('xtreme_user_id')||'admin-user-id';
+    payload.instruction_text=extractedInstruction;
+    const button=document.getElementById('confirmAssignment');busy=true;button.disabled=true;button.textContent='Creating task…';notice.hidden=true;
+    try{
+      const result=await request(endpoints.confirm,{method:'POST',body:JSON.stringify(payload)});
+      if(result.success!==true)throw new Error('The server did not confirm the save. Check n8n before submitting again.');
+      saved=true;document.getElementById('createdProjectId').textContent=result.project_id??'—';document.getElementById('createdTaskId').textContent=result.task_id??'—';document.getElementById('assignmentSuccess').textContent=result.message||'Assignment created successfully.';showStep(3);
+      if(result.refresh_required!==false){try{await refreshProjects();document.getElementById('assignmentSuccess').textContent='Assignment saved successfully and task progress refreshed.'}catch(error){document.getElementById('assignmentSuccess').textContent='Assignment saved, but task progress could not refresh.';showNotice(`Do not submit again. Refresh error: ${error.message}`,true)}}
+    }catch(error){showNotice(`${error.message} Check the n8n execution and database before retrying.`,true)}finally{busy=false;button.disabled=saved;button.textContent='Confirm & create task'}
+  });
+
+  const employeeFilter=document.getElementById('taskProgressEmployee');
+  const statusFilter=document.getElementById('taskProgressStatus');
+  const refreshButton=document.getElementById('refreshTaskProgress');
+  const rows=document.getElementById('taskProgressRows');
+  const empty=document.getElementById('taskProgressEmpty');
+  const progressError=document.getElementById('taskProgressError');
+  let tasks=[],chart=null,lastLoad=0;
+  const field=(object,keys,fallback='')=>{for(const key of keys)if(object?.[key]!==undefined&&object[key]!==null)return object[key];return fallback};
+  const escapeHtml=input=>String(input??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  function normaliseTasks(payload){
+    const root=Array.isArray(payload)?payload:(payload.projects||payload.tasks||payload.data||[]),output=[];
+    root.forEach(item=>{
+      const nested=field(item,['tasks','project_tasks','assigned_tasks'],null);
+      (Array.isArray(nested)?nested:[item]).forEach(task=>{
+        const combined={...item,...task};
+        const progress=Math.max(0,Math.min(100,Number(field(combined,['progress_percentage','Progress_Percentage','progress','completion_percentage'],0))||0));
+        const rawStatus=String(field(combined,['task_status','status','Status'],progress>=100?'Completed':'Assigned'));
+        const blockedValue=field(combined,['blocked','Blocked'],0);
+        const blocked=blockedValue===true||Number(blockedValue)===1||rawStatus.toLowerCase()==='blocked';
+        output.push({taskId:field(combined,['task_id','Task_ID','id']),title:field(combined,['task_title','Task_Title','title'],'Untitled task'),project:field(combined,['project_name','Project_Name'],''),employeeId:String(field(combined,['employee_id','Employee_ID'],'')),employee:field(combined,['employee_name','Employee_Name','name'],'Unknown employee'),manager:field(combined,['manager_name','Manager_Name'],'—'),progress,status:blocked?'Blocked':(progress>=100?'Completed':rawStatus),blocked,blockerName:field(combined,['blocker_type','blocker_name','Blocker_Name'],''),blockerDescription:field(combined,['blocker_description','Blocker_Description','existing_blocker'],'')});
+      });
+    });
+    return output.filter(task=>task.taskId!==undefined&&task.taskId!==null&&task.taskId!=='');
+  }
+  function populateEmployees(){
+    const previous=employeeFilter.value;
+    const people=[...new Map(tasks.map(task=>[task.employeeId,task.employee])).entries()].sort((a,b)=>String(a[1]).localeCompare(String(b[1])));
+    employeeFilter.innerHTML='<option value="">All employees</option>'+people.map(([id,name])=>`<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`).join('');
+    if(people.some(([id])=>id===previous))employeeFilter.value=previous;
+  }
+  function renderProgress(){
+    const employeeId=employeeFilter.value,status=statusFilter.value.toLowerCase();
+    const filtered=tasks.filter(task=>(!employeeId||task.employeeId===employeeId)&&(!status||task.status.toLowerCase()===status));
+    const average=filtered.length?Math.round(filtered.reduce((sum,task)=>sum+task.progress,0)/filtered.length):0;
+    document.getElementById('progressTaskCount').textContent=String(filtered.length);document.getElementById('progressAverage').textContent=`${average}%`;document.getElementById('progressCompleted').textContent=String(filtered.filter(task=>task.progress>=100).length);document.getElementById('progressBlocked').textContent=String(filtered.filter(task=>task.blocked).length);
+    rows.innerHTML=filtered.map(task=>{const blocker=task.blockerName||task.blockerDescription||(task.blocked?'Blocker reported':'—');const statusClass=task.status.toLowerCase().replace(/\s+/g,'-');return `<tr><td><strong>${escapeHtml(task.title)}</strong><span class="muted">${escapeHtml(task.project)}</span></td><td>${escapeHtml(task.employee)}<span class="muted">Manager: ${escapeHtml(task.manager)}</span></td><td><span class="rate">${task.progress}%</span><div class="mini-track"><div class="mini-fill" style="width:${task.progress}%"></div></div></td><td><span class="task-status ${statusClass}">${escapeHtml(task.status)}</span></td><td>${escapeHtml(blocker)}${task.blockerName&&task.blockerDescription?`<span class="muted">${escapeHtml(task.blockerDescription)}</span>`:''}</td></tr>`}).join('');
+    empty.hidden=filtered.length>0;
+    if(chart)chart.destroy();
+    chart=new Chart(document.getElementById('taskProgressChart'),{type:'bar',data:{labels:filtered.map(task=>task.title.length>25?task.title.slice(0,25)+'…':task.title),datasets:[{data:filtered.map(task=>task.progress),backgroundColor:filtered.map(task=>task.blocked?'#B91C1C':task.progress>=100?'#0E7A4F':'#C2410C'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{beginAtZero:true,max:100,ticks:{callback:value=>value+'%'}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:context=>` ${context.raw}% complete`}}}}});
+  }
+  async function loadProgress(force=false){
+    if(!force&&Date.now()-lastLoad<1000)return;
+    refreshButton.disabled=true;refreshButton.textContent='Loading…';progressError.hidden=true;
+    try{const payload=await request(endpoints.projects,{method:'GET'});tasks=normaliseTasks(payload);lastLoad=Date.now();populateEmployees();renderProgress()}catch(error){progressError.textContent=error.message;progressError.hidden=false;tasks=[];populateEmployees();renderProgress()}finally{refreshButton.disabled=false;refreshButton.textContent='Refresh progress'}
+  }
+  function activateProgress(){if(location.hash==='#task-progress')loadProgress()}
+  window.addEventListener('hashchange',activateProgress);activateProgress();
+  refreshButton.addEventListener('click',()=>loadProgress(true));employeeFilter.addEventListener('change',renderProgress);statusFilter.addEventListener('change',renderProgress);
+  window.addEventListener('dashboard:projects-refreshed',event=>{tasks=normaliseTasks(event.detail.projects||[]);populateEmployees();renderProgress()});
 })();
 </script>
 </body>
