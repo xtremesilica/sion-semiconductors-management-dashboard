@@ -1508,7 +1508,7 @@ function route(){
   const onBu=pages.includes(h);
   const onProgress=h==='task-progress';
   document.getElementById('home-view').classList.toggle('hide',onBu||onProgress);
-  document.querySelector('footer').hidden=onProgress;
+  document.querySelector('footer').style.display=onProgress?'none':'';
   document.getElementById('task-progress').classList.toggle('on',onProgress);
   document.getElementById('taskProgressLink').classList.toggle('on',onProgress);
   pages.forEach(p=>document.getElementById(p).classList.toggle('on',p===h));
